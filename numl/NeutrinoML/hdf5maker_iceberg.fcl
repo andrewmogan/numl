@@ -1,0 +1,42 @@
+#include "services_refactored_pdune.fcl"
+#include "HDF5Maker.fcl"
+#include "tools_dune.fcl"
+
+process_name: numl
+
+services:
+{
+  TFileService:           { fileName: "single_iceberg_refactored_hist.root" }
+  TimeTracker:            {}
+  MemoryTracker:          {}
+  RandomNumberGenerator:  {}
+  ExptGeoHelperInterface: @local::dune_geometry_helper
+  Geometry:               @local::iceberg_geo
+  FileCatalogMetadata:    @local::art_file_catalog_mc
+  BackTrackerService:            @local::dunefd_backtrackerservice_legacy
+#BackTrackerService:     @local::standard_backtrackerservice
+  ParticleInventoryService: @local::standard_particleinventoryservice
+#@table::dunefd_simulation_services
+  message:                @local::dune_message_services
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1
+}
+
+physics:
+{
+
+  analyzers:
+  {
+    hdf5maker:   @local::hdf5maker
+  }
+
+  ana:       [ hdf5maker ]
+  end_paths:     [ ana ]  
+}
+
+physics.analyzers.hdf5maker.SPLabel: "spsolve"
+services.BackTrackerService.BackTracker.SimChannelModuleLabel: "elecDrift"
